@@ -1,3 +1,4 @@
+// app/admin/dashboard/DashboardContent.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -25,12 +26,9 @@ export default function DashboardContent() {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (!session || error) {
-          console.log('No session found, redirecting to login...');
           router.push('/admin/login');
           return;
         }
-
-        console.log('Session found:', session.user.email);
         setIsCheckingAuth(false);
       } catch (error) {
         console.error('Auth check error:', error);
@@ -40,65 +38,53 @@ export default function DashboardContent() {
 
     checkAuth();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event);
-      
       if (event === 'SIGNED_OUT' || !session) {
         router.push('/admin/login');
       }
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, [router]);
 
   // Fetch registrations
-  // Fetch registrations
-const fetchRegistrations = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('prayer_conference_registrations')
-      .select('*')
-      .order('created_at', { ascending: false });
+  const fetchRegistrations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('prayer_conference_registrations')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) throw error;
+      if (error) throw error;
+      setRegistrations(data || []);
+    } catch (error) {
+      console.error('Error fetching registrations:', error);
+      toast.error('Failed to load registrations');
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
 
-    setRegistrations(data || []);
-  } catch (error) {
-    console.error('Error fetching registrations:', error);
-    toast.error('Failed to load registrations');
-  } finally {
-    setIsLoading(false);
-    setIsRefreshing(false);
-  }
-};
   // Real-time subscription
   useEffect(() => {
-    if (isCheckingAuth) return; // Don't fetch until auth is verified
-
+    if (isCheckingAuth) return;
     fetchRegistrations();
 
-    // Subscribe to new registrations
     const subscription = supabase
-      .channel('registrations-channel')
+      .channel('prayer-conference-registrations')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'registrations',
+          table: 'prayer_conference_registrations',
         },
         (payload) => {
-          console.log('Real-time update:', payload);
-          
           if (payload.eventType === 'INSERT') {
-            toast.success('New registration received! 🎉', {
-              duration: 5000,
-            });
+            toast.success('New registration received! 🎉', { duration: 5000 });
             fetchRegistrations();
-          } else if (payload.eventType === 'UPDATE' || payload.eventType === 'DELETE') {
+          } else {
             fetchRegistrations();
           }
         }
@@ -110,22 +96,17 @@ const fetchRegistrations = async () => {
     };
   }, [isCheckingAuth]);
 
-  // Logout
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
+      await supabase.auth.signOut();
       toast.success('Logged out successfully');
       router.push('/admin/login');
-      router.refresh();
     } catch (error) {
       console.error('Logout error:', error);
       toast.error('Failed to logout');
     }
   };
 
-  // Manual refresh
   const handleRefresh = () => {
     setIsRefreshing(true);
     fetchRegistrations();
@@ -135,7 +116,7 @@ const fetchRegistrations = async () => {
     return (
       <div className="min-h-screen bg-gradient-to-b from-background to-muted flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">
             {isCheckingAuth ? 'Verifying authentication...' : 'Loading dashboard...'}
           </p>
@@ -159,7 +140,9 @@ const fetchRegistrations = async () => {
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-foreground">Admin Dashboard</h1>
-                  <p className="text-sm text-muted-foreground">Divine Worship Splash 2026</p>
+                  <p className="text-sm text-muted-foreground">
+                    Koach Ha-Tefillah Prayer Conference 2026
+                  </p>
                 </div>
               </div>
 
@@ -184,23 +167,10 @@ const fetchRegistrations = async () => {
 
         {/* Main Content */}
         <div className="container mx-auto px-4 py-8">
-          {/* Stats Cards */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <StatsCards registrations={registrations} />
-          </motion.div>
-
-          {/* Registrations Table */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
+          <StatsCards registrations={registrations} />
+          <div className="mt-8">
             <RegistrationsTable registrations={registrations} />
-          </motion.div>
+          </div>
         </div>
       </div>
     </>
