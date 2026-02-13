@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import DashboardContent from './DashboardContent';
 
 export const metadata: Metadata = {
-  title: 'Dashboard | Divine Worship Splash 2026',
+  title: 'Dashboard | Koach Ha-Tefillah Conference',
   description: 'Admin dashboard for managing registrations',
 };
 

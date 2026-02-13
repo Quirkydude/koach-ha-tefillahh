@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Users, UserCheck, Briefcase, UserPlus, TrendingUp } from 'lucide-react';
+import { Users, UserCheck, Briefcase, Moon, Calendar, TrendingUp } from 'lucide-react';
 import type { Registration } from '@/types';
 
 interface StatsCardsProps {
@@ -10,10 +10,7 @@ interface StatsCardsProps {
 
 export default function StatsCards({ registrations }: StatsCardsProps) {
   const totalRegistrations = registrations.length;
-  const firstTimers = registrations.filter((r) => r.first_time_attendee).length;
-  const attendees = registrations.filter((r) => r.role === 'Attendee').length;
-  const executives = registrations.filter((r) => r.role === 'Executive').length;
-  const guestMinisters = registrations.filter((r) => r.role === 'Guest Minister').length;
+  const sleepingOver = registrations.filter((r) => r.will_sleep).length;
 
   // Calculate today's registrations
   const today = new Date();
@@ -23,6 +20,15 @@ export default function StatsCards({ registrations }: StatsCardsProps) {
     regDate.setHours(0, 0, 0, 0);
     return regDate.getTime() === today.getTime();
   }).length;
+
+  // Calculate days distribution
+  const dayCounts = {
+    day1: registrations.filter(r => r.days_attending.includes('day1')).length,
+    day2: registrations.filter(r => r.days_attending.includes('day2')).length,
+    day3: registrations.filter(r => r.days_attending.includes('day3')).length,
+    day4: registrations.filter(r => r.days_attending.includes('day4')).length,
+    day5: registrations.filter(r => r.days_attending.includes('day5')).length,
+  };
 
   const stats = [
     {
@@ -35,31 +41,23 @@ export default function StatsCards({ registrations }: StatsCardsProps) {
       change: `+${todayRegistrations} today`,
     },
     {
-      title: 'First-Time Attendees',
-      value: firstTimers,
-      icon: UserPlus,
-      color: 'from-green-500 to-green-600',
-      bgColor: 'bg-green-50',
-      textColor: 'text-green-600',
-      change: `${((firstTimers / totalRegistrations) * 100).toFixed(0)}% of total`,
+      title: 'Sleeping Over',
+      value: sleepingOver,
+      icon: Moon,
+      color: 'from-indigo-500 to-indigo-600',
+      bgColor: 'bg-indigo-50',
+      textColor: 'text-indigo-600',
+      change: `${((sleepingOver / totalRegistrations) * 100).toFixed(0)}% of total`,
     },
+    
     {
-      title: 'Regular Attendees',
-      value: attendees,
-      icon: UserCheck,
+      title: 'Day 1 Attendance',
+      value: dayCounts.day1,
+      icon: Calendar,
       color: 'from-purple-500 to-purple-600',
       bgColor: 'bg-purple-50',
       textColor: 'text-purple-600',
-      change: `${((attendees / totalRegistrations) * 100).toFixed(0)}% of total`,
-    },
-    {
-      title: 'Executive Team',
-      value: executives,
-      icon: Briefcase,
-      color: 'from-orange-500 to-orange-600',
-      bgColor: 'bg-orange-50',
-      textColor: 'text-orange-600',
-      change: `${guestMinisters} guest ministers`,
+      change: `${dayCounts.day2} on Day 2, ${dayCounts.day3} on Day 3`,
     },
   ];
 
@@ -76,7 +74,6 @@ export default function StatsCards({ registrations }: StatsCardsProps) {
             whileHover={{ y: -4 }}
             className="bg-white rounded-2xl shadow-lg p-6 border border-border hover:shadow-xl transition-all duration-300"
           >
-            {/* Icon */}
             <div className="flex items-start justify-between mb-4">
               <div className={`${stat.bgColor} p-3 rounded-xl`}>
                 <Icon className={`w-6 h-6 ${stat.textColor}`} />
@@ -86,7 +83,6 @@ export default function StatsCards({ registrations }: StatsCardsProps) {
               </div>
             </div>
 
-            {/* Value */}
             <div className="mb-2">
               <motion.h3
                 initial={{ scale: 0.5 }}
@@ -98,12 +94,10 @@ export default function StatsCards({ registrations }: StatsCardsProps) {
               </motion.h3>
             </div>
 
-            {/* Title */}
             <p className="text-sm font-medium text-muted-foreground mb-2">
               {stat.title}
             </p>
 
-            {/* Change indicator */}
             <p className="text-xs text-muted-foreground">
               {stat.change}
             </p>

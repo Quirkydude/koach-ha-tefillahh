@@ -2,7 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, Download, ChevronDown, CheckCircle, XCircle, Calendar, Phone, Mail, MapPin } from 'lucide-react';
+import { 
+  Search, Filter, Download, ChevronDown, CheckCircle, XCircle, 
+  Calendar, Phone, Mail, MapPin, Moon, Home, Users 
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -28,10 +31,18 @@ interface RegistrationsTableProps {
   registrations: Registration[];
 }
 
+const DAYS_MAP = {
+  'day1': 'Day 1 (Feb 18)',
+  'day2': 'Day 2 (Feb 19)',
+  'day3': 'Day 3 (Feb 20)',
+  'day4': 'Day 4 (Feb 21)',
+  'day5': 'Day 5 (Feb 22)',
+};
+
 export default function RegistrationsTable({ registrations }: RegistrationsTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
-  const [firstTimeFilter, setFirstTimeFilter] = useState<string>('all');
+  const [sleepFilter, setSleepFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const itemsPerPage = 10;
@@ -42,17 +53,16 @@ export default function RegistrationsTable({ registrations }: RegistrationsTable
       const matchesSearch =
         reg.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         reg.phone_number.includes(searchQuery) ||
-        reg.registration_number.toLowerCase().includes(searchQuery.toLowerCase());
+        reg.registration_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (reg.email?.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      const matchesRole = roleFilter === 'all' || reg.role === roleFilter;
-      const matchesFirstTime =
-        firstTimeFilter === 'all' ||
-        (firstTimeFilter === 'yes' && reg.first_time_attendee) ||
-        (firstTimeFilter === 'no' && !reg.first_time_attendee);
+      const matchesSleep = sleepFilter === 'all' || 
+        (sleepFilter === 'yes' && reg.will_sleep) ||
+        (sleepFilter === 'no' && !reg.will_sleep);
 
-      return matchesSearch && matchesRole && matchesFirstTime;
+      return matchesSearch && matchesSleep;
     });
-  }, [registrations, searchQuery, roleFilter, firstTimeFilter]);
+  }, [registrations, searchQuery, roleFilter, sleepFilter]);
 
   // Pagination
   const totalPages = Math.ceil(filteredRegistrations.length / itemsPerPage);
@@ -70,11 +80,16 @@ export default function RegistrationsTable({ registrations }: RegistrationsTable
       'Phone Number': reg.phone_number,
       'Email': reg.email || 'N/A',
       'Age Range': reg.age_range,
-      'Gender': reg.gender || 'N/A',
-      'First Time': reg.first_time_attendee ? 'Yes' : 'No',
-      'Role': reg.role,
-      'Department': reg.executive_department || 'N/A',
-      'Area': reg.area_residence || 'N/A',
+      'Gender': reg.gender,
+      'Area of Residence': reg.area_residence,
+      'Student/Worker': reg.student_or_worker,
+      'Occupation': reg.occupation || 'N/A',
+      'Will Sleep': reg.will_sleep ? 'Yes' : 'No',
+      'Days Attending': reg.days_attending.map(d => DAYS_MAP[d as keyof typeof DAYS_MAP]).join(', '),
+      'Emergency Contact': reg.emergency_contact_name,
+      'Emergency Phone': reg.emergency_contact_phone,
+      'Medical Condition': reg.medical_condition || 'N/A',
+      'Dietary Restrictions': reg.dietary_restrictions || 'N/A',
       'SMS Sent': reg.sms_sent ? 'Yes' : 'No',
       'Registered At': format(new Date(reg.created_at), 'dd/MM/yyyy HH:mm'),
     }));
@@ -84,7 +99,7 @@ export default function RegistrationsTable({ registrations }: RegistrationsTable
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `divine-worship-registrations-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    link.setAttribute('download', `prayer-conference-registrations-${format(new Date(), 'yyyy-MM-dd')}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -92,44 +107,14 @@ export default function RegistrationsTable({ registrations }: RegistrationsTable
     toast.success('Exported successfully!');
   };
 
-  // Export to Excel (CSV with .xlsx extension for Excel compatibility)
-  const exportToExcel = () => {
-    const csvData = filteredRegistrations.map((reg) => ({
-      'Registration Number': reg.registration_number,
-      'Full Name': reg.full_name,
-      'Phone Number': `'${reg.phone_number}`, // Preserve leading zero
-      'Email': reg.email || 'N/A',
-      'Age Range': reg.age_range,
-      'Gender': reg.gender || 'N/A',
-      'First Time': reg.first_time_attendee ? 'Yes' : 'No',
-      'Role': reg.role,
-      'Department': reg.executive_department || 'N/A',
-      'Area': reg.area_residence || 'N/A',
-      'SMS Sent': reg.sms_sent ? 'Yes' : 'No',
-      'Registered At': format(new Date(reg.created_at), 'dd/MM/yyyy HH:mm'),
-    }));
-
-    const csv = Papa.unparse(csvData);
-    const blob = new Blob([csv], { type: 'application/vnd.ms-excel' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `divine-worship-registrations-${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success('Exported to Excel successfully!');
-  };
-
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'Attendee':
         return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'Executive':
+      case 'Volunteer':
+        return 'bg-green-100 text-green-700 border-green-200';
+      case 'Media Team':
         return 'bg-purple-100 text-purple-700 border-purple-200';
-      case 'Guest Minister':
-        return 'bg-orange-100 text-orange-700 border-orange-200';
       default:
         return 'bg-gray-100 text-gray-700 border-gray-200';
     }
@@ -145,7 +130,7 @@ export default function RegistrationsTable({ registrations }: RegistrationsTable
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search by name, phone, or registration number..."
+              placeholder="Search by name, phone, email, or registration number..."
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -162,28 +147,29 @@ export default function RegistrationsTable({ registrations }: RegistrationsTable
               setCurrentPage(1);
             }}>
               <SelectTrigger className="w-[180px] h-12">
-                <Filter className="w-4 h-4 mr-2" />
+                <Users className="w-4 h-4 mr-2" />
                 <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Roles</SelectItem>
                 <SelectItem value="Attendee">Attendee</SelectItem>
-                <SelectItem value="Executive">Executive</SelectItem>
-                <SelectItem value="Guest Minister">Guest Minister</SelectItem>
+                <SelectItem value="Volunteer">Volunteer</SelectItem>
+                <SelectItem value="Media Team">Media Team</SelectItem>
               </SelectContent>
             </Select>
 
-            <Select value={firstTimeFilter} onValueChange={(value) => {
-              setFirstTimeFilter(value);
+            <Select value={sleepFilter} onValueChange={(value) => {
+              setSleepFilter(value);
               setCurrentPage(1);
             }}>
               <SelectTrigger className="w-[180px] h-12">
-                <SelectValue placeholder="First time?" />
+                <Moon className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Sleeping over?" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Attendees</SelectItem>
-                <SelectItem value="yes">First-timers</SelectItem>
-                <SelectItem value="no">Returning</SelectItem>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="yes">Sleeping Over</SelectItem>
+                <SelectItem value="no">Not Sleeping</SelectItem>
               </SelectContent>
             </Select>
 
@@ -199,9 +185,6 @@ export default function RegistrationsTable({ registrations }: RegistrationsTable
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={exportToCSV}>
                   Export as CSV
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={exportToExcel}>
-                  Export as Excel
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -231,13 +214,16 @@ export default function RegistrationsTable({ registrations }: RegistrationsTable
                 Name
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Phone
+                Contact
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Role
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                First Time
+                Sleep
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Days
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 SMS
@@ -266,27 +252,33 @@ export default function RegistrationsTable({ registrations }: RegistrationsTable
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-foreground">{reg.full_name}</div>
+                    <div className="text-xs text-muted-foreground">{reg.age_range}, {reg.gender}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-foreground">{reg.phone_number}</div>
                     {reg.email && (
                       <div className="text-xs text-muted-foreground">{reg.email}</div>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                    {reg.phone_number}
+                  <td className="px-6 py-4 whitespace-nowrap">
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <Badge className={getRoleBadgeColor(reg.role)}>
-                      {reg.role}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {reg.first_time_attendee ? (
-                      <span className="flex items-center gap-1 text-green-600">
-                        <CheckCircle className="w-4 h-4" />
+                    {reg.will_sleep ? (
+                      <span className="flex items-center gap-1 text-indigo-600">
+                        <Moon className="w-4 h-4" />
                         Yes
                       </span>
                     ) : (
-                      <span className="text-muted-foreground">No</span>
+                      <span className="flex items-center gap-1 text-muted-foreground">
+                        <Home className="w-4 h-4" />
+                        No
+                      </span>
                     )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="text-sm">
+                      {reg.days_attending.length} days
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {reg.sms_sent ? (
@@ -305,6 +297,22 @@ export default function RegistrationsTable({ registrations }: RegistrationsTable
         </table>
       </div>
 
+      {/* Expanded Details */}
+      <AnimatePresence>
+        {expandedRow && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="border-t bg-muted/20 p-6"
+          >
+            {registrations.find(r => r.id === expandedRow) && (
+              <RegistrationDetails registration={registrations.find(r => r.id === expandedRow)!} />
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Cards - Mobile */}
       <div className="lg:hidden divide-y divide-border">
         <AnimatePresence>
@@ -316,15 +324,13 @@ export default function RegistrationsTable({ registrations }: RegistrationsTable
               exit={{ opacity: 0, y: -20 }}
               transition={{ delay: index * 0.05 }}
               className="p-4 hover:bg-muted/30 transition-colors"
+              onClick={() => setExpandedRow(expandedRow === reg.id ? null : reg.id)}
             >
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h3 className="font-semibold text-foreground">{reg.full_name}</h3>
                   <p className="text-xs font-mono text-primary">{reg.registration_number}</p>
                 </div>
-                <Badge className={getRoleBadgeColor(reg.role)}>
-                  {reg.role}
-                </Badge>
               </div>
 
               <div className="space-y-2 text-sm">
@@ -338,23 +344,20 @@ export default function RegistrationsTable({ registrations }: RegistrationsTable
                     {reg.email}
                   </div>
                 )}
-                {reg.area_residence && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="w-4 h-4" />
-                    {reg.area_residence}
-                  </div>
-                )}
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <Calendar className="w-4 h-4" />
-                  {format(new Date(reg.created_at), 'dd/MM/yyyy HH:mm')}
+                  <MapPin className="w-4 h-4" />
+                  {reg.area_residence}
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 mt-3 pt-3 border-t">
-                <span className="text-xs text-muted-foreground">
-                  {reg.first_time_attendee ? '🆕 First-timer' : '🔁 Returning'}
+              <div className="flex items-center gap-4 mt-3 pt-3 border-t text-xs">
+                <span className={reg.will_sleep ? 'text-indigo-600' : 'text-muted-foreground'}>
+                  {reg.will_sleep ? '🛏️ Sleeping' : '🏠 Commuting'}
                 </span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground">
+                  📅 {reg.days_attending.length} days
+                </span>
+                <span className="text-muted-foreground">
                   {reg.sms_sent ? '✅ SMS Sent' : '❌ SMS Pending'}
                 </span>
               </div>
@@ -411,6 +414,72 @@ export default function RegistrationsTable({ registrations }: RegistrationsTable
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// Registration Details Component
+function RegistrationDetails({ registration }: { registration: Registration }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="space-y-3">
+        <h4 className="font-semibold text-sm text-foreground flex items-center gap-2">
+          <Users className="w-4 h-4" /> Personal Information
+        </h4>
+        <div className="space-y-2 text-sm">
+          <p><span className="text-muted-foreground">Age:</span> {registration.age_range}</p>
+          <p><span className="text-muted-foreground">Gender:</span> {registration.gender}</p>
+          <p><span className="text-muted-foreground">Area:</span> {registration.area_residence}</p>
+          <p><span className="text-muted-foreground">Status:</span> {registration.student_or_worker}</p>
+          {registration.occupation && (
+            <p><span className="text-muted-foreground">Occupation:</span> {registration.occupation}</p>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <h4 className="font-semibold text-sm text-foreground flex items-center gap-2">
+          <Calendar className="w-4 h-4" /> Attendance
+        </h4>
+        <div className="space-y-2 text-sm">
+          <p><span className="text-muted-foreground">Days attending:</span></p>
+          <ul className="list-disc list-inside space-y-1">
+            {registration.days_attending.map(day => (
+              <li key={day} className="text-sm">
+                {DAYS_MAP[day as keyof typeof DAYS_MAP]}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2">
+            <span className="text-muted-foreground">Sleeping:</span>{' '}
+            {registration.will_sleep ? 'Yes (bring bedding)' : 'No'}
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <h4 className="font-semibold text-sm text-foreground flex items-center gap-2">
+          <Phone className="w-4 h-4" /> Emergency Contact
+        </h4>
+        <div className="space-y-2 text-sm">
+          <p><span className="text-muted-foreground">Name:</span> {registration.emergency_contact_name}</p>
+          <p><span className="text-muted-foreground">Phone:</span> {registration.emergency_contact_phone}</p>
+        </div>
+
+        {registration.medical_condition && (
+          <>
+            <h4 className="font-semibold text-sm text-foreground mt-4">Medical Conditions</h4>
+            <p className="text-sm">{registration.medical_condition}</p>
+          </>
+        )}
+
+        {registration.dietary_restrictions && (
+          <>
+            <h4 className="font-semibold text-sm text-foreground mt-4">Dietary Restrictions</h4>
+            <p className="text-sm">{registration.dietary_restrictions}</p>
+          </>
+        )}
+      </div>
     </div>
   );
 }

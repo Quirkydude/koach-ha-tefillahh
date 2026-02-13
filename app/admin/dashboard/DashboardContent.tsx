@@ -55,25 +55,25 @@ export default function DashboardContent() {
   }, [router]);
 
   // Fetch registrations
-  const fetchRegistrations = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('registrations')
-        .select('*')
-        .order('created_at', { ascending: false });
+  // Fetch registrations
+const fetchRegistrations = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('prayer_conference_registrations')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-      if (error) throw error;
+    if (error) throw error;
 
-      setRegistrations(data || []);
-    } catch (error) {
-      console.error('Error fetching registrations:', error);
-      toast.error('Failed to load registrations');
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  };
-
+    setRegistrations(data || []);
+  } catch (error) {
+    console.error('Error fetching registrations:', error);
+    toast.error('Failed to load registrations');
+  } finally {
+    setIsLoading(false);
+    setIsRefreshing(false);
+  }
+};
   // Real-time subscription
   useEffect(() => {
     if (isCheckingAuth) return; // Don't fetch until auth is verified
