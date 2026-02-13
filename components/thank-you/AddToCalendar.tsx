@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Calendar } from 'lucide-react';
 import { FaGoogle, FaApple } from 'react-icons/fa';
-import { SiMicrosoftoutlook } from 'react-icons/si';
+import { SiGmail } from 'react-icons/si';
 
 export default function AddToCalendar() {
   const eventDetails = {
@@ -58,7 +58,7 @@ END:VCALENDAR`;
     },
     {
       name: 'Outlook',
-      icon: SiMicrosoftoutlook,
+      icon: SiGmail,
       color: 'from-blue-500 to-blue-700',
       onClick: generateICS,
     },
