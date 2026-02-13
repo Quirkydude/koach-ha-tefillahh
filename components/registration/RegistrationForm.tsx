@@ -337,7 +337,7 @@ export default function RegistrationForm() {
                       </Label>
                       <Input
                         id="area_residence"
-                        placeholder="e.g., Accra, Tema, Kumasi"
+                        placeholder="e.g., Habitat, Town, Nkotom"
                         {...register('area_residence')}
                         className={cn("h-12 text-base", errors.area_residence && "border-red-500")}
                       />
