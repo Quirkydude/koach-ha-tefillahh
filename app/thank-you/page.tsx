@@ -3,12 +3,11 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { CheckCircle, Home, Download, Calendar as CalendarIcon } from 'lucide-react';
+import { CheckCircle, Home, Calendar as CalendarIcon, Cross, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import ConfettiEffect from '@/components/thank-you/ConfettiEffect';
 import AddToCalendar from '@/components/thank-you/AddToCalendar';
-import SocialShare from '@/components/thank-you/SocialShare';
 import WhatToBring from '@/components/thank-you/WhatToBring';
 import { Toaster } from 'react-hot-toast';
 
@@ -23,7 +22,6 @@ function ThankYouContent() {
   useEffect(() => {
     setMounted(true);
 
-    // Redirect if no registration number
     if (!searchParams.get('reg')) {
       router.push('/register');
     }
@@ -38,9 +36,9 @@ function ThankYouContent() {
       <ConfettiEffect />
       <Toaster position="top-center" />
 
-      <div className="min-h-screen bg-gradient-to-b from-background via-green-50/30 to-background py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-b from-background via-orange-50/30 to-background py-12 px-4">
         <div className="max-w-3xl mx-auto">
-          {/* Success Icon */}
+          {/* Success Icon with Cross */}
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -58,7 +56,7 @@ function ThankYouContent() {
                   repeat: Infinity,
                   repeatDelay: 1,
                 }}
-                className="w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-2xl"
+                className="w-24 h-24 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center shadow-2xl"
               >
                 <CheckCircle className="w-14 h-14 text-white" strokeWidth={2.5} />
               </motion.div>
@@ -67,12 +65,12 @@ function ThankYouContent() {
               <motion.div
                 animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="absolute inset-0 border-4 border-green-400 rounded-full"
+                className="absolute inset-0 border-4 border-primary rounded-full"
               />
               <motion.div
                 animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0, 0.3] }}
                 transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-                className="absolute inset-0 border-4 border-green-300 rounded-full"
+                className="absolute inset-0 border-4 border-secondary rounded-full"
               />
             </div>
           </motion.div>
@@ -85,10 +83,10 @@ function ThankYouContent() {
             className="text-center mb-8"
           >
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-              You're All Set, {userName.split(' ')[0]}! 🎉
+              You're Registered, {userName.split(' ')[0]}! 🙏
             </h1>
             <p className="text-xl text-muted-foreground">
-              We can't wait to worship with you!
+              See you at Koach Ha-Tefillah Conference!
             </p>
           </motion.div>
 
@@ -124,8 +122,8 @@ function ThankYouContent() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t">
               <div className="text-center">
                 <CalendarIcon className="w-6 h-6 text-primary mx-auto mb-2" />
-                <p className="text-sm font-semibold text-foreground">SAT, 31 JAN 2026</p>
-                <p className="text-xs text-muted-foreground">Save the date</p>
+                <p className="text-sm font-semibold text-foreground">18-22 FEB 2026</p>
+                <p className="text-xs text-muted-foreground">5 Days of Prayer</p>
               </div>
               <div className="text-center">
                 <motion.div
@@ -135,8 +133,8 @@ function ThankYouContent() {
                 >
                   ⏰
                 </motion.div>
-                <p className="text-sm font-semibold text-foreground">9:00 AM - 6:30 PM</p>
-                <p className="text-xs text-muted-foreground">Full day event</p>
+                <p className="text-sm font-semibold text-foreground">6:45 PM</p>
+                <p className="text-xs text-muted-foreground">Each night</p>
               </div>
               <div className="text-center">
                 <motion.div
@@ -146,8 +144,8 @@ function ThankYouContent() {
                 >
                   📍
                 </motion.div>
-                <p className="text-sm font-semibold text-foreground">Casely-Hayford Hall</p>
-                <p className="text-xs text-muted-foreground">UCC Campus</p>
+                <p className="text-sm font-semibold text-foreground">Habitat Auditorium</p>
+                <p className="text-xs text-muted-foreground">Fosu</p>
               </div>
             </div>
           </motion.div>
@@ -162,35 +160,25 @@ function ThankYouContent() {
             <AddToCalendar />
           </motion.div>
 
-          {/* Social Share */}
+          {/* What to Bring */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
             className="bg-white rounded-3xl shadow-xl p-8 mb-6"
           >
-            <SocialShare registrationNumber={registrationNumber} userName={userName} />
+            <WhatToBring />
           </motion.div>
 
-          {/* What to Bring */}
+          {/* Important Notes */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9 }}
-            className="bg-white rounded-3xl shadow-xl p-8 mb-6"
-          >
-            <WhatToBring />
-          </motion.div>
-
-          {/* Important Note */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.1 }}
-            className="bg-gradient-to-r from-accent/10 via-secondary/10 to-primary/10 rounded-2xl p-6 mb-8 border border-primary/20"
+            className="bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 rounded-2xl p-6 mb-8 border border-primary/20"
           >
             <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-              <span className="text-xl">💡</span>
+              <Cross className="w-5 h-5 text-primary" />
               Important Reminders
             </h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
@@ -200,15 +188,19 @@ function ThankYouContent() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary mt-0.5">•</span>
-                <span>Gates open at 8:30 AM - arrive early for the best seats!</span>
+                <span>Arrive early each night (doors open at 6:00 PM)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-0.5">•</span>
+                <span>Bring your Bible and a notebook for taking notes</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-0.5">•</span>
+                <span>If you registered to sleep at the venue, bring bedding and toiletries</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary mt-0.5">•</span>
                 <span>We'll send you event updates and reminders via SMS</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">•</span>
-                <span>For any questions, call 059 285 2555 or 059 475 7828</span>
               </li>
             </ul>
           </motion.div>
@@ -217,7 +209,7 @@ function ThankYouContent() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.3 }}
+            transition={{ delay: 1.1 }}
             className="text-center"
           >
             <Link href="/">
@@ -236,10 +228,12 @@ function ThankYouContent() {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.5 }}
+            transition={{ delay: 1.3 }}
             className="text-center text-sm text-muted-foreground mt-8"
           >
-            See you at Divine Worship Splash 2026! 🙏✨
+            See you at Koach Ha-Tefillah Conference! 🙏✨
+            <br />
+            <span className="text-primary font-semibold">#ThereIsPowerInMyPrayers</span>
           </motion.p>
         </div>
       </div>

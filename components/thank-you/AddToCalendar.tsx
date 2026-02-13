@@ -1,17 +1,17 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Calendar, Download } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { FaGoogle, FaApple } from 'react-icons/fa';
-import { SiGmail } from 'react-icons/si';
+import { SiMicrosoftoutlook } from 'react-icons/si';
 
 export default function AddToCalendar() {
   const eventDetails = {
-    title: 'Divine Worship Splash 2026',
-    description: 'A transformative day of worship with Yefter Nkansah - Invitation to Light Experience',
-    location: 'Casely-Hayford Hall, UCC Campus, Cape Coast',
-    startDate: '20260131T090000',
-    endDate: '20260131T183000',
+    title: 'Koach Ha-Tefillah Prayer Conference',
+    description: '5 Days Prayer Feaster - "There is Power in my Prayers" - Judges 16:19-30, 1 Samuel 17',
+    location: 'Habitat Auditorium, Fosu, Ghana',
+    startDate: '20260218T184500',
+    endDate: '20260222T210000',
   };
 
   // Google Calendar URL
@@ -37,7 +37,7 @@ END:VCALENDAR`;
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
     const link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
-    link.download = 'divine-worship-splash-2026.ics';
+    link.download = 'koach-ha-tefillah-conference.ics';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -58,7 +58,7 @@ END:VCALENDAR`;
     },
     {
       name: 'Outlook',
-      icon: SiGmail,
+      icon: SiMicrosoftoutlook,
       color: 'from-blue-500 to-blue-700',
       onClick: generateICS,
     },

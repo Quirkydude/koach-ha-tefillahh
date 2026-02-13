@@ -1,20 +1,26 @@
-export type AgeRange = '12-17' | '18-25' | '26-35' | '36-45' | '46+';
-export type Gender = 'Male' | 'Female' | 'Prefer not to say';
-export type Role = 'Attendee' | 'Executive' | 'Guest Minister';
+export type AgeRange = '12-17' | '18-25' | '26-35' | '36+';
+export type Gender = 'Male' | 'Female';
+export type StudentOrWorker = 'Student' | 'Worker';
 
 export interface RegistrationFormData {
   full_name: string;
   phone_number: string;
   email?: string;
   age_range: AgeRange;
-  gender?: Gender;
-  first_time_attendee: boolean;
-  role: Role;
-  executive_department?: string;
-  area_residence?: string;
+  gender: Gender;
+  area_residence: string;
+  medical_condition?: string;
+  student_or_worker: StudentOrWorker;
+  occupation?: string;
+  will_sleep: boolean;
+  days_attending: string[];
+  emergency_contact_name: string;
+  emergency_contact_phone: string;
+  dietary_restrictions?: string;
+  consent: boolean;
 }
 
-export interface Registration extends RegistrationFormData {
+export interface Registration extends Omit<RegistrationFormData, 'consent'> {
   id: string;
   registration_number: string;
   sms_sent: boolean;
@@ -26,4 +32,5 @@ export interface RegistrationResponse {
   registration_number?: string;
   message: string;
   data?: Registration;
+  sms_sent?: boolean;
 }

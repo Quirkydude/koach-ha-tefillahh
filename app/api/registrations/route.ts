@@ -7,7 +7,7 @@ export async function GET(request: Request) {
 
     // Get all registrations
     const { data, error } = await supabase
-      .from('registrations')
+      .from('prayer_conference_registrations')
       .select('*')
       .order('created_at', { ascending: false });
 

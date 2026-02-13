@@ -20,18 +20,23 @@ export async function POST(request: Request) {
       phone_number: body.phone_number,
       email: body.email || null,
       age_range: body.age_range,
-      gender: body.gender || null,
-      first_time_attendee: body.first_time_attendee,
-      role: body.role,
-      executive_department: body.role === 'Executive' ? body.executive_department : null,
-      area_residence: body.area_residence || null,
+      gender: body.gender,
+      area_residence: body.area_residence,
+      medical_condition: body.medical_condition || null,
+      student_or_worker: body.student_or_worker,
+      occupation: body.student_or_worker === 'Worker' ? body.occupation : null,
+      will_sleep: body.will_sleep,
+      days_attending: body.days_attending,
+      emergency_contact_name: body.emergency_contact_name,
+      emergency_contact_phone: body.emergency_contact_phone,
+      dietary_restrictions: body.dietary_restrictions || null,
       registration_number: registrationNumber,
       sms_sent: false,
     };
 
     // Insert into database
     const { data, error } = await supabase
-      .from('registrations')
+      .from('prayer_conference_registrations')
       .insert([registrationData])
       .select()
       .single();
@@ -59,15 +64,42 @@ export async function POST(request: Request) {
       );
     }
 
+    // Format days for SMS
+    const daysText = body.days_attending
+      .map((d: string) => {
+        const dayMap: {[key: string]: string} = {
+          'day1': 'Day 1 (Feb 18)',
+          'day2': 'Day 2 (Feb 19)',
+          'day3': 'Day 3 (Feb 20)',
+          'day4': 'Day 4 (Feb 21)',
+          'day5': 'Day 5 (Feb 22)',
+        };
+        return dayMap[d] || d;
+      })
+      .join(', ');
+
     // Send SMS confirmation
-    const smsMessage = `Hi ${body.full_name}! 🎉\n\nYou're registered for Divine Worship Splash 2026!\n\nRegistration #: ${registrationNumber}\nDate: SAT, 31 JAN 2026\nTime: 9AM-6:30PM\nVenue: Casely-Hayford field, UCC Campus\n\nSee you there!\n- Invitation to Light`;
+    const smsMessage = `Shalom ${body.full_name}! 🙏
+
+You're registered for Koach Ha-Tefillah Prayer Conference!
+
+Registration #: ${registrationNumber}
+Days: ${daysText}
+Time: 6:45 PM each night
+Venue: Habitat Auditorium, Fosu
+
+${body.will_sleep ? 'You registered to sleep at the venue. Please bring bedding.' : ''}
+
+#ThereIsPowerInMyPrayers
+
+See you there!`;
 
     const smsResult = await sendSMS(formattedPhone, smsMessage);
 
     // Update SMS status
     if (smsResult.success) {
       await supabase
-        .from('registrations')
+        .from('prayer_conference_registrations')
         .update({ sms_sent: true })
         .eq('id', data.id);
     }

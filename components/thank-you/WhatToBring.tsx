@@ -1,13 +1,18 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Heart, Users, Shirt, Smile } from 'lucide-react';
+import { Book, Heart, Users, Moon } from 'lucide-react';
 
 export default function WhatToBring() {
   const items = [
     {
+      icon: Book,
+      text: 'Your Bible and a notebook for taking notes',
+      color: 'text-primary',
+    },
+    {
       icon: Heart,
-      text: 'Your enthusiasm and open heart',
+      text: 'An open heart ready to encounter God',
       color: 'text-red-500',
     },
     {
@@ -16,14 +21,9 @@ export default function WhatToBring() {
       color: 'text-blue-500',
     },
     {
-      icon: Shirt,
-      text: 'Comfortable clothes for a full day',
-      color: 'text-green-500',
-    },
-    {
-      icon: Smile,
-      text: 'Your beautiful smile and positive energy',
-      color: 'text-yellow-500',
+      icon: Moon,
+      text: 'Bedding & toiletries (if sleeping at venue)',
+      color: 'text-purple-500',
     },
   ];
 
