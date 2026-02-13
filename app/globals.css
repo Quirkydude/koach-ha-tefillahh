@@ -1,0 +1,81 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* CSS Variables - KOACH HA-TEFILLAH COLORS */
+  :root {
+    --background: 40 25% 97%; /* Warm cream #FAF6F1 */
+    --foreground: 20 30% 15%; /* Dark brown #2D1F1A */
+    
+    --primary: 25 75% 45%; /* Rust/Orange #C75F2E */
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 20 50% 25%; /* Dark brown #5C342A */
+    --secondary-foreground: 0 0% 100%;
+    
+    --accent: 200 80% 55%; /* Light blue (from cross) #4DB8E8 */
+    --accent-foreground: 0 0% 100%;
+    
+    --muted: 40 20% 94%;
+    --muted-foreground: 0 0% 45%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 20 30% 15%;
+    
+    --border: 40 15% 88%;
+    --input: 40 15% 88%;
+    --ring: 25 75% 45%;
+    
+    --radius: 1rem;
+  }
+}
+
+/* Custom classes */
+@layer utilities {
+  .gradient-hero {
+    background: linear-gradient(135deg, #C75F2E 0%, #5C342A 50%, #4DB8E8 100%);
+  }
+  
+  .prayer-gradient {
+    background: linear-gradient(to bottom right, 
+      rgba(199, 95, 46, 0.9),   /* rust orange */
+      rgba(92, 52, 42, 0.9),    /* dark brown */
+      rgba(77, 184, 232, 0.9)   /* light blue */
+    );
+  }
+}
